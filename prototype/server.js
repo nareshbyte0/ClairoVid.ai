@@ -122,7 +122,7 @@ const server = http.createServer((req, res) => {
     res.writeHead(405, { Allow: "GET, HEAD" }).end("Method not allowed");
     return;
   }
-  const requested = pathname === "/" ? "/index.html" : pathname;
+  const requested = pathname === "/" ? "/home.html" : pathname === "/demo" ? "/index.html" : pathname;
   const file = path.resolve(root, `.${requested}`);
   if (!file.startsWith(root + path.sep)) {
     res.writeHead(403).end("Forbidden");
