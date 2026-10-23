@@ -34,7 +34,7 @@ The first milestone is one complete, reviewable video. The prototype exit gate i
 - Next.js dashboard, authentication and user-facing voice picker.
 - MongoDB Atlas, R2-backed storage, Inngest jobs, and hosted rendering.
 - Instagram OAuth, publishing, and scheduling.
-- Billing, backups, shared workspaces, public signup, and brand controls remain outside V1 entirely.
+- This local prototype defers billing, production backups, public signup, and brand controls because they are application concerns. In the full V1, public signup and managed production backups with tested restore are required for launch; billing, shared workspaces, and brand controls remain out of scope, consistent with the PRD.
 
 No arbitrary generated React/JavaScript execution, photorealistic video API, voice cloning, background music, or extra AI image provider is needed for this prototype.
 
@@ -375,7 +375,7 @@ The production system architecture document should specify database indexes, own
 - Model/voice IDs, latency, limitations, and architectural changes recorded.
 - Clear recommendation to proceed, improve the component library, or change a pipeline choice.
 
-Prototype status from the supplied implementation notes: three live narrated topics have rendered; the water-cycle direction was approved; RAM and binary-search outputs still await full playback feedback. The user deferred premium Indian narrator evaluation, and Daniel was used as the test narrator. Therefore, the PRD Phase 0 gate to evaluate both Indian English presets is still open. The referenced PROTOTYPE_STATUS.md and recovery reports were not present in the workspace during this update; attach them to the implementation record before calling the gate complete.
+Prototype status from the supplied implementation notes and latest application design: three live narrated topics have rendered; the water-cycle direction and latest binary-search output were accepted; RAM playback review remains pending. The user deferred premium Indian narrator evaluation, and Daniel was used as the test narrator. Therefore, the PRD Phase 0 gate to evaluate both Indian English presets is still open. The referenced PROTOTYPE_STATUS.md and recovery reports were not present in the workspace during this update; attach them to the implementation record before calling the gate complete.
 
 ## 15. Official references checked for the design
 
@@ -390,7 +390,7 @@ These sources establish provider capabilities, not the quality of this proposed 
 
 - The supplied prototype update records approval of the water-cycle visual direction and deferral of premium Indian voices; Daniel remains the test narrator. This is a prototype status note, not a change to the V1 PRD requirement to evaluate and offer two curated Indian English presets.
 - Planner uses the stateless Gemini Interactions API. RAM used Gemini 3.5 Flash; binary search succeeded with an explicit 3.8 Flash override after 3.5 errors. The configured prototype default remains 3.5 according to the implementation note; the current PRD baseline calls for Gemini 3.8 Flash. Resolve and document this configuration difference before Phase 0 sign-off. Do not silently substitute a model. Runtime validation and factual review remain necessary.
-- Three live narrated topics rendered: authored water cycle, Gemini RAM plus revision, and Gemini binary search plus operator review. RAM and binary search still await user playback feedback.
+- Three live narrated topics rendered: authored water cycle, Gemini RAM plus revision, and Gemini binary search plus operator review. The latest application design records acceptance of the binary-search output; RAM playback review remains pending.
 - Binary-search data is bounded to 3–9 sorted distinct integers. Trusted code computes midpoint and elimination; the AI supplies narration and exact phrase cues. Midpoint and decision events are separately aligned to speech.
 - `edit-plan` creates a new reviewed revision with a new approval hash and compatible speech cache. A real visual-only revision reused seven clips with zero speech generation and preserved its source export.
 - Injected renderer failure recorded failed state and released the lock; resume completed with provider calls disabled. A lingering-process bug was fixed and a separate fresh failure test verified automatic exit. Evidence is in the recovery reports listed in PROTOTYPE_STATUS.md.
