@@ -24,8 +24,8 @@ Statuses:
 | Sign-up, sign-in, and MongoDB-backed sessions | Needs acceptance | Better Auth and MongoDB are wired. Sessions are configured to persist for 30 days and refresh during active use. Production email verification requires Resend. Verify the new login and logo navigation with a real account. |
 | Signed-in logo navigation | Needs acceptance | Workspace logos go to `/dashboard`; the signed-in homepage logo and actions are session-aware. Existing sign-in/sign-up routes redirect an active session to the dashboard. Verify these paths with the user's account. |
 | Personal dashboard and project library | Partial | Owner-scoped project list, status filters, responsive navigation, and empty state are present. API listing is limited to 50; cursor-based Load more is not implemented. |
-| Project creation and private ownership | Needs acceptance | The project is created by an explicit authenticated POST, not by rendering `/projects/new`. Creation uses an idempotency key so retries return the same project. Verify create → dashboard → reopen with the user's account. |
-| Idea editor and draft autosave | Needs acceptance | Draft validation and revision checks are present. Saves are serialized so edits typed during an in-flight save are sent afterward; failed saves can be retried and refresh warns when edits remain unsaved. Test persistence across reload and conflict/error recovery. |
+| Project creation and private ownership | Implemented | Signed-in acceptance passed October 26: created one project, returned to My videos, and reopened it. Creation uses an authenticated idempotent POST. Repeated-request behavior was not fault-injected. |
+| Idea editor and draft autosave | Implemented | Signed-in acceptance passed October 26: entered a topic, waited for Saved, refreshed, and reopened the project; the topic remained. Concurrent-edit and forced save-failure recovery paths still need dedicated checks. |
 | Gemini brainstorming | Needs acceptance | Authenticated endpoint and three-angle UI are implemented. Provider access and output quality have not been verified in this pass. |
 | Gemini storyboard generation | Partial | Generation endpoint, editable scene UI, and explicit approval are present. Quality, stale-result recovery, and the full revision workflow need acceptance. |
 | Conversational storyboard/video revisions | Not started | The current editor supports direct scene edits; chat-based revision is not implemented. |
@@ -39,18 +39,21 @@ Statuses:
 
 ## Active milestone
 
-**M2 — Create a private project and persist its idea**  
-Implementation is present; account-based acceptance is pending. Work is intentionally limited to this flow.
+**M2 — Create a private project and persist its idea: accepted October 26, 2026**
+
+The signed-in happy path passed in the user's browser. One private project was created, its topic autosaved, and the same topic remained after refresh and reopening from My videos. The browser showed three drafts afterward (two existing plus the new test project).
 
 Acceptance checklist:
 
-1. Click **New explainer** and confirm one private project opens at the Idea step.
-2. Enter a topic and wait for the editor to say **Saved**.
-3. Refresh, reopen the project from My videos, and confirm the topic remains.
-4. Confirm a repeated/uncertain create request does not create a duplicate project.
-5. Confirm a failed save shows an error and a retry action; unsaved edits trigger the browser's leave warning.
+1. **Passed:** Clicked **New explainer** and confirmed one private project opened at the Idea step.
+2. **Passed:** Entered a topic and waited for the editor to say **Saved**.
+3. **Passed:** Refreshed, reopened the project from My videos, and confirmed the topic remained.
+4. **Not fault-injected:** Repeated/uncertain create requests should reuse the idempotency key and avoid a duplicate.
+5. **Not fault-injected:** Save failure retry and the browser leave warning remain to be checked.
 
-**Previous milestone M1 — Session and logo navigation:** Code is present; real-account acceptance remains pending because the browser session used for review was signed out. The founder asked to proceed with M2 before completing that manual check.
+Responsive follow-up: the narrow Edge workspace viewport used for this check showed horizontal overflow on the dashboard. Check the responsive layout separately before mobile acceptance.
+
+**Previous milestone M1 — Session and logo navigation:** The signed-in session is confirmed through this acceptance run. Logo navigation itself was not part of this check and remains to be rechecked.
 
 ## Next milestones (one at a time)
 
@@ -70,13 +73,13 @@ Each milestone should have one bounded behavior, a written acceptance checklist,
 - TypeScript check (`npx tsc --noEmit`): passed October 26, 2026.
 - ESLint (`eslint src --no-cache`): passed October 26, 2026.
 - Browser smoke check: public homepage loaded. Signed-out visits to `/dashboard` and `/projects/new` redirected to `/sign-in`; unauthenticated `GET /api/projects` returned 401.
-- No active signed-in browser session was available, so authenticated project creation, autosave, refresh/reopen, and duplicate-retry behavior were not end-to-end tested.
-- MongoDB configuration is present in `.env.local`, but a read-only ping from the command runner did not complete; database-backed behavior is still awaiting a live session check.
+- Signed-in M2 acceptance: project creation, autosave, refresh, and reopen passed in the user's browser on October 26, 2026.
+- A direct read-only MongoDB ping from the command runner did not complete; however, authenticated create/save/reload/reopen succeeded through the app, exercising the configured database path.
 - Project creation uses an idempotent POST; `/projects/new` no longer writes to MongoDB during a GET/prefetch.
 - Draft writes now drain edits that arrive during an active request instead of leaving the newest text unsaved.
 - Account-based creation, reload, and save-failure acceptance remain unverified because there is no active signed-in browser session.
 - Local homepage and sign-in pages load on `http://127.0.0.1:4173/`.
-- The signed-in dashboard could not be visually verified in this pass because the browser had no active session.
+- The signed-in dashboard was visually inspected in the available Edge viewport; horizontal overflow was visible, so responsive layout still needs follow-up.
 - Production build has not been verified; do not run it concurrently with the active dev server because both use the configured `.next-build` directory.
 - Stitch's existing project opened but returned “Sorry, we hit a snag.” The dashboard implementation follows the approved Cinema references and [dashboard design handoff](./ClairoVid.ai%20-%20Dashboard%20Design.md); a new generated Stitch dashboard screen was not available to inspect.
 
