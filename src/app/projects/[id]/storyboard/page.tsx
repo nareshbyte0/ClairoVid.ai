@@ -1,3 +1,26 @@
-import Link from "next/link";import {headers} from "next/headers";import {redirect,notFound} from "next/navigation";import {auth} from "@/auth/server";import {getOwnedProject} from "@/domain/project";import {StoryboardEditor} from "@/components/storyboard-editor";
-export const dynamic="force-dynamic";
-export default async function StoryboardPage({params}:{params:Promise<{id:string}>}){const user=(await auth.api.getSession({headers:await headers()}))?.user;if(!user)redirect("/sign-in");const project=await getOwnedProject(user.id,(await params).id);if(!project)notFound();return <main className="editorShell"><header className="editorHeader"><Link className="brand" href="/">Clairo<span>Vid</span><small>.ai</small></Link><Link href={`/projects/${project._id.toHexString()}/idea`} className="backLink">← Back to idea</Link><div className="saveState">Private workspace</div></header><div className="stepsLine"><span className="done"><b>✓</b> Idea</span><i/><span className="active"><b>02</b> Storyboard</span><i/><span><b>03</b> Video</span><i/><span><b>04</b> Publish</span></div><StoryboardEditor projectId={project._id.toHexString()} voicePreset={project.draft?.voicePreset||"indian_male"}/></main>}
+import { headers } from "next/headers";
+import { redirect, notFound } from "next/navigation";
+import Link from "next/link";
+import { auth } from "@/auth/server";
+import { BrandLogo } from "@/components/brand-logo";
+import { getOwnedProject } from "@/domain/project";
+import { StoryboardEditor } from "@/components/storyboard-editor";
+
+export const dynamic = "force-dynamic";
+
+export default async function StoryboardPage({ params }: { params: Promise<{ id: string }> }) {
+  const user = (await auth.api.getSession({ headers: await headers() }))?.user;
+  if (!user) redirect("/sign-in");
+  const project = await getOwnedProject(user.id, (await params).id);
+  if (!project) notFound();
+
+  return <main className="editorShell">
+    <header className="editorHeader">
+      <BrandLogo href="/dashboard" label="ClairoVid.ai — My videos" />
+      <Link href={`/projects/${project._id.toHexString()}/idea`} className="backLink">← Back to idea</Link>
+      <div className="saveState">Private workspace</div>
+    </header>
+    <div className="stepsLine"><span className="done"><b>✓</b> Idea</span><i/><span className="active"><b>02</b> Storyboard</span><i/><span><b>03</b> Video</span><i/><span><b>04</b> Publish</span></div>
+    <StoryboardEditor projectId={project._id.toHexString()} voicePreset={project.draft?.voicePreset || "indian_male"} />
+  </main>;
+}
