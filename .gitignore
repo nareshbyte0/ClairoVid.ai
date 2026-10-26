@@ -7,3 +7,4 @@ node_modules/
 prototype/output/
 runs/
 *.tsbuildinfo
+.codex-dev*.log

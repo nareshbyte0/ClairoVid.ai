@@ -2,11 +2,18 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { getAuthDb } from "@/db/mongo";
 
+const requireEmailVerification = process.env.NODE_ENV === "production";
+
 export const auth = betterAuth({
   database: mongodbAdapter(getAuthDb()),
-  emailAndPassword: { enabled: true, requireEmailVerification: true, minPasswordLength: 12 },
+  session: {
+    // Keep the browser signed in across reloads and restarts; active use refreshes the window daily.
+    expiresIn: 60 * 60 * 24 * 30,
+    updateAge: 60 * 60 * 24,
+  },
+  emailAndPassword: { enabled: true, requireEmailVerification, minPasswordLength: 12 },
   emailVerification: {
-    sendOnSignUp: true,
+    sendOnSignUp: requireEmailVerification,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
       const key = process.env.RESEND_API_KEY;

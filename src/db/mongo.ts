@@ -1,6 +1,7 @@
 import { MongoClient, type Db } from "mongodb";
 
 const uri = process.env.MONGODB_URI;
+
 const globalForMongo = globalThis as typeof globalThis & { mongoClient?: MongoClient; mongoPromise?: Promise<MongoClient> };
 const client = globalForMongo.mongoClient ?? new MongoClient(uri || "mongodb://127.0.0.1:27017");
 if (process.env.NODE_ENV !== "production") globalForMongo.mongoClient = client;
