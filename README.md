@@ -1,6 +1,6 @@
 # ClairoVid.ai
 
-Public V1 application foundation for creating educational explainers. Product scope and decisions: [Final V1 PRD](./Product%20Requirements%20Document%20-%20AI%20Educational%20Video%20Generation%20SaaS.md), [Application System Design](./ClairoVid.ai%20-%20Application%20System%20Design.md), [Pipeline Technical Design](./ClairoVid.ai%20-%20Pipeline%20Technical%20Design.md).
+V1 development app for creating educational explainers. Product scope and decisions: [Final V1 PRD](./Product%20Requirements%20Document%20-%20AI%20Educational%20Video%20Generation%20SaaS.md), [Application System Design](./ClairoVid.ai%20-%20Application%20System%20Design.md), [Pipeline Technical Design](./ClairoVid.ai%20-%20Pipeline%20Technical%20Design.md). Current implementation and one-feature-at-a-time plan: [Project Status](./PROJECT_STATUS.md).
 
 ## Stack
 
@@ -19,14 +19,14 @@ Do not paste API keys in source files, send them in chat, or commit `.env.local`
 ## Implemented application paths
 
 - Signed-out product home, account registration/sign-in, email verification callback through Better Auth, and a private personal dashboard.
-- Private projects, owner-scoped project creation and draft reads/writes, revision-conflict detection, autosaving Idea screen, and Gemini storyboard generation.
-- Editable storyboard scenes, explicit approval, and ElevenLabs narration generation for configured Indian English male/female presets. Audio is stored in private R2 and served through a short-lived signed URL.
+- Private projects, owner-scoped idempotent project creation, revision-checked draft reads/writes, serialized Idea autosaving, Gemini brainstorming, and storyboard generation.
+- Editable storyboard scenes, explicit approval, and ElevenLabs narration with timed caption cues. Audio/captions are persisted to private R2 only when R2 is configured; otherwise local development returns a temporary, unsaved audio preview. No MP4 is rendered yet.
 - `/api/health` reports configuration presence only; it never returns credential values.
 
 The existing `prototype/` remains an isolated evaluation demo and is not the Next.js app.
 
 ## V1 work still required before public launch
 
-This repository now contains the production app foundation; it does not yet meet the entire public V1 PRD. Email sending, Atlas, R2 and both curated public voice presets require account configuration. Video rendering still needs a detached Remotion/Vercel Sandbox adapter, durable Inngest workflows/outbox/recovery, caption editing and MP4 QA. Instagram OAuth/publishing/scheduling, rate limits and abuse controls, privacy/deletion flows, managed backups/restore, support materials, accessibility/content evaluation and production deployment remain launch gates. Do not describe those screens and integrations as operational until implemented and verified against the corresponding accounts.
+This repository contains the V1 app foundation; it does not yet meet the entire public V1 PRD. Email sending, R2 and curated public voice presets require account configuration. Video rendering still needs a detached Remotion/Vercel Sandbox adapter, durable Inngest workflows/outbox/recovery, caption editing and MP4 QA. Instagram OAuth/publishing/scheduling, rate limits and abuse controls, privacy/deletion flows, managed backups/restore, support materials, accessibility/content evaluation and production deployment remain launch gates. Do not describe those screens and integrations as operational until implemented and verified against the corresponding accounts. See [Project Status](./PROJECT_STATUS.md) for current feature-level truth and sequencing.
 
 Production release is blocked until those gates are complete. Audio-only generation shown in the Video stage is not a finished MP4 video.
