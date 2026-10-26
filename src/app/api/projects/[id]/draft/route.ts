@@ -3,7 +3,7 @@ import { auth } from "@/auth/server";
 import { getOwnedProject, saveDraft } from "@/domain/project";
 import { z } from "zod";
 export const runtime = "nodejs";
-const draftSchema = z.object({ topic: z.string().max(2000), audience: z.string().max(300), notes: z.string().max(20000), voicePreset: z.enum(["indian_male", "indian_female"]) });
+const draftSchema = z.object({ topic: z.string().max(2000), audience: z.string().max(200), notes: z.string().max(20000), voicePreset: z.enum(["indian_male", "indian_female"]) });
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = (await auth.api.getSession({ headers: await headers() }))?.user; if (!user) return Response.json({ error: "Sign in required." }, { status: 401 });
   const project = await getOwnedProject(user.id, (await params).id); if (!project) return Response.json({ error: "Project not found." }, { status: 404 });

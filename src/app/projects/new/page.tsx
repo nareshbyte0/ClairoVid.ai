@@ -1,6 +1,13 @@
-import { redirect } from "next/navigation";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth/server";
-import { createProject } from "@/domain/project";
+import { ProjectCreationFlow } from "@/components/project-creation-flow";
+
 export const dynamic = "force-dynamic";
-export default async function NewProject() { const user=(await auth.api.getSession({headers:await headers()}))?.user; if(!user) redirect("/sign-in"); const project=await createProject(user.id,""); redirect(`/projects/${project.id}/idea`); }
+
+export default async function NewProject() {
+  const user = (await auth.api.getSession({ headers: await headers() }))?.user;
+  if (!user) redirect("/sign-in");
+
+  return <ProjectCreationFlow />;
+}
