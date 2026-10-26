@@ -27,7 +27,7 @@ Statuses:
 | Project creation and private ownership | Implemented | Signed-in acceptance passed October 26: created one project, returned to My videos, and reopened it. Creation uses an authenticated idempotent POST. Repeated-request behavior was not fault-injected. |
 | Idea editor and draft autosave | Implemented | Signed-in acceptance passed October 26: entered a topic, waited for Saved, refreshed, and reopened the project; the topic remained. Concurrent-edit and forced save-failure recovery paths still need dedicated checks. |
 | Gemini brainstorming | Needs acceptance | Authenticated endpoint and three-angle UI are implemented. Provider access and output quality have not been verified in this pass. |
-| Gemini storyboard generation | Partial | Generation endpoint, editable scene UI, and explicit approval are present. Quality, stale-result recovery, and the full revision workflow need acceptance. |
+| Gemini storyboard generation | Partial | Signed-in generation was tried; Gemini returned HTTP 503 and remained unavailable after one retry. The app now retries one transient 503 and preserves the idea with a clear error. No storyboard was returned, so scene editing and approval remain unverified. |
 | Conversational storyboard/video revisions | Not started | The current editor supports direct scene edits; chat-based revision is not implemented. |
 | ElevenLabs narration and timed caption cues | Partial | Generation route and synchronized audio/caption preview are present. Without R2, local preview is temporary and unsaved. A voice/caption preview is not a rendered video. |
 | Editable captions | Not started | Captions can be previewed, but there is no caption editing or saved revised caption version. |
@@ -39,17 +39,18 @@ Statuses:
 
 ## Active milestone
 
-**M2 — Create a private project and persist its idea: accepted October 26, 2026**
+**M3 — Generate, edit, and approve a storyboard: in progress, blocked on Gemini availability**
 
-The signed-in happy path passed in the user's browser. One private project was created, its topic autosaved, and the same topic remained after refresh and reopening from My videos. The browser showed three drafts afterward (two existing plus the new test project).
+The signed-in storyboard action was tested on the saved river-flow idea. Gemini returned HTTP 503; the bounded retry also returned 503. The idea remains saved. No storyboard was created, so editing and approval cannot be accepted yet.
 
 Acceptance checklist:
 
-1. **Passed:** Clicked **New explainer** and confirmed one private project opened at the Idea step.
-2. **Passed:** Entered a topic and waited for the editor to say **Saved**.
-3. **Passed:** Refreshed, reopened the project from My videos, and confirmed the topic remained.
-4. **Not fault-injected:** Repeated/uncertain create requests should reuse the idempotency key and avoid a duplicate.
-5. **Not fault-injected:** Save failure retry and the browser leave warning remain to be checked.
+1. **Blocked:** Generate a storyboard successfully with Gemini.
+2. **Pending:** Confirm narration and scene visuals load and are editable.
+3. **Pending:** Save an edit, refresh, and confirm it remains.
+4. **Pending:** Confirm video generation stays unavailable until the current storyboard is approved.
+
+**Accepted M2 — Create a private project and persist its idea (October 26, 2026):** created one private project, saved its topic, refreshed, and reopened it from My videos. The topic remained. Duplicate-create retries and forced save-failure recovery were not fault-injected.
 
 Responsive follow-up: the narrow Edge workspace viewport used for this check showed horizontal overflow on the dashboard. Check the responsive layout separately before mobile acceptance.
 
@@ -77,7 +78,9 @@ Each milestone should have one bounded behavior, a written acceptance checklist,
 - A direct read-only MongoDB ping from the command runner did not complete; however, authenticated create/save/reload/reopen succeeded through the app, exercising the configured database path.
 - Project creation uses an idempotent POST; `/projects/new` no longer writes to MongoDB during a GET/prefetch.
 - Draft writes now drain edits that arrive during an active request instead of leaving the newest text unsaved.
-- Account-based creation, reload, and save-failure acceptance remain unverified because there is no active signed-in browser session.
+- Duplicate-create behavior and forced save-failure recovery remain unverified; the signed-in create/save/reload/reopen happy path passed.
+- Storyboard attempt: the configured Gemini model returned HTTP 503 twice (initial request plus one retry). The saved idea remained intact; no storyboard was created.
+- Gemini storyboard requests now retry one transient 503, time out sooner, and show actionable timeout/network errors without exposing provider credentials.
 - Local homepage and sign-in pages load on `http://127.0.0.1:4173/`.
 - The signed-in dashboard was visually inspected in the available Edge viewport; horizontal overflow was visible, so responsive layout still needs follow-up.
 - Production build has not been verified; do not run it concurrently with the active dev server because both use the configured `.next-build` directory.
