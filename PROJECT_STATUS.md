@@ -1,6 +1,6 @@
 # ClairoVid.ai — Project Status
 
-**Updated:** October 26, 2026  
+**Updated:** November 2, 2026
 **Release:** V1 development  
 **Overall:** Core app foundation is in place; V1 is not launch-ready.
 
@@ -27,9 +27,9 @@ Statuses:
 | Project creation and private ownership | Implemented | Signed-in acceptance passed October 26: created one project, returned to My videos, and reopened it. Creation uses an authenticated idempotent POST. Repeated-request behavior was not fault-injected. |
 | Idea editor and draft autosave | Implemented | Signed-in acceptance passed October 26: entered a topic, waited for Saved, refreshed, and reopened the project; the topic remained. Concurrent-edit and forced save-failure recovery paths still need dedicated checks. |
 | Gemini brainstorming | Needs acceptance | Authenticated endpoint and three-angle UI are implemented. Provider access and output quality have not been verified in this pass. |
-| Gemini storyboard generation | Partial | Signed-in generation was tried; Gemini returned HTTP 503 and remained unavailable after one retry. The app now retries one transient 503 and preserves the idea with a clear error. No storyboard was returned, so scene editing and approval remain unverified. |
+| Gemini storyboard generation | Partial / provider-blocked | Retested November 2 after `.env.local` was updated. The running server loads the configured key/model, but two storyboard-shaped requests returned HTTP 503 (“model currently experiencing high demand”). No storyboard was returned; scene editing and approval remain unverified. |
 | Conversational storyboard/video revisions | Not started | The current editor supports direct scene edits; chat-based revision is not implemented. |
-| ElevenLabs narration and timed caption cues | Partial | Generation route and synchronized audio/caption preview are present. Without R2, local preview is temporary and unsaved. A voice/caption preview is not a rendered video. |
+| ElevenLabs narration and timed caption cues | Partial | Generation route and synchronized audio/caption preview are present. Read-only voice-access check: configured male voice returned HTTP 200; configured female voice returned HTTP 400. No TTS characters were generated during this check. Without R2, local preview is temporary and unsaved. A voice/caption preview is not a rendered video. |
 | Editable captions | Not started | Captions can be previewed, but there is no caption editing or saved revised caption version. |
 | Persistent generation jobs and recovery | Partial | Job records are written, but the durable Inngest workflow, resumable stage runner, and full recovery experience are not wired. |
 | Remotion render and 1080p MP4 download | Not started | No final MP4 renderer or downloadable video is available in the app. |
@@ -41,7 +41,7 @@ Statuses:
 
 **M3 — Generate, edit, and approve a storyboard: in progress, blocked on Gemini availability**
 
-The signed-in storyboard action was tested on the saved river-flow idea. Gemini returned HTTP 503; the bounded retry also returned 503. The idea remains saved. No storyboard was created, so editing and approval cannot be accepted yet.
+The saved river-flow idea remains intact. On November 2, the updated configured Gemini key/model was loaded by the local server, and two storyboard-shaped requests still returned HTTP 503 from Google due to high demand. No storyboard was created, so editing and approval cannot be accepted yet. The configured ElevenLabs male voice is accessible; the female voice returned HTTP 400. Private R2 storage and the MP4 renderer are not configured, so persistent output and a final video are not available.
 
 Acceptance checklist:
 
@@ -81,6 +81,8 @@ Each milestone should have one bounded behavior, a written acceptance checklist,
 - Duplicate-create behavior and forced save-failure recovery remain unverified; the signed-in create/save/reload/reopen happy path passed.
 - Storyboard attempt: the configured Gemini model returned HTTP 503 twice (initial request plus one retry). The saved idea remained intact; no storyboard was created.
 - Gemini storyboard requests now retry one transient 503, time out sooner, and show actionable timeout/network errors without exposing provider credentials.
+- November 2 pipeline retest: `.env.local` contains the updated Gemini key/model and the restarted server reports Gemini configured. A direct storyboard-shaped Gemini request plus one retry returned HTTP 503 both times (high demand); no output was produced. No paid ElevenLabs synthesis was triggered; read-only configured voice checks returned male 200 and female 400.
+- November 2 app health: local app returned `ok`; MongoDB, auth, Gemini and ElevenLabs are configured. Email, R2 private storage, Inngest and Instagram are not configured. Without R2 and Remotion rendering, narration can only be a temporary development preview and the final MP4 stage is unavailable.
 - Local homepage and sign-in pages load on `http://127.0.0.1:4173/`.
 - The signed-in dashboard was visually inspected in the available Edge viewport; horizontal overflow was visible, so responsive layout still needs follow-up.
 - Production build has not been verified; do not run it concurrently with the active dev server because both use the configured `.next-build` directory.
