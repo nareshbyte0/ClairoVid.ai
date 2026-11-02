@@ -41,7 +41,7 @@ Statuses:
 
 **M3 — Generate, edit, and approve a storyboard: in progress, blocked on Gemini availability**
 
-The saved river-flow idea remains intact. On November 2, the updated configured Gemini key/model was loaded by the local server, and two storyboard-shaped requests still returned HTTP 503 from Google due to high demand. No storyboard was created, so editing and approval cannot be accepted yet. The configured ElevenLabs male voice is accessible; the female voice returned HTTP 400. Private R2 storage and the MP4 renderer are not configured, so persistent output and a final video are not available.
+The saved river-flow idea remains intact. On November 2, Google's model catalog accepted the configured key (HTTP 200) and listed the selected `gemini-3.8-flash` model. Two storyboard-shaped generation attempts still returned HTTP 503 from Google due to high demand. No storyboard was created, so editing and approval cannot be accepted yet. The configured ElevenLabs male voice is accessible; the female voice returned HTTP 400. Private R2 storage and the MP4 renderer are not configured, so persistent output and a final video are not available.
 
 Acceptance checklist:
 
@@ -81,7 +81,7 @@ Each milestone should have one bounded behavior, a written acceptance checklist,
 - Duplicate-create behavior and forced save-failure recovery remain unverified; the signed-in create/save/reload/reopen happy path passed.
 - Storyboard attempt: the configured Gemini model returned HTTP 503 twice (initial request plus one retry). The saved idea remained intact; no storyboard was created.
 - Gemini storyboard requests now retry one transient 503, time out sooner, and show actionable timeout/network errors without exposing provider credentials.
-- November 2 pipeline retest: `.env.local` contains the updated Gemini key/model and the restarted server reports Gemini configured. A direct storyboard-shaped Gemini request plus one retry returned HTTP 503 both times (high demand); no output was produced. No paid ElevenLabs synthesis was triggered; read-only configured voice checks returned male 200 and female 400.
+- November 2 pipeline retest: `.env.local` contains the updated Gemini key/model and the restarted server reports Gemini configured. Google's model catalog accepted the key (HTTP 200) and lists `gemini-3.8-flash`; a direct storyboard-shaped generation request plus one retry returned HTTP 503 both times (high demand), so no output was produced. No paid ElevenLabs synthesis was triggered; read-only configured voice checks returned male 200 and female 400.
 - November 2 app health: local app returned `ok`; MongoDB, auth, Gemini and ElevenLabs are configured. Email, R2 private storage, Inngest and Instagram are not configured. Without R2 and Remotion rendering, narration can only be a temporary development preview and the final MP4 stage is unavailable.
 - Local homepage and sign-in pages load on `http://127.0.0.1:4173/`.
 - The signed-in dashboard was visually inspected in the available Edge viewport; horizontal overflow was visible, so responsive layout still needs follow-up.
