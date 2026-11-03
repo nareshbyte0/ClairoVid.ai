@@ -29,11 +29,11 @@ Statuses:
 | Gemini brainstorming | Needs acceptance | Authenticated endpoint and three-angle UI are implemented. Provider access and output quality have not been verified in this pass. |
 | Gemini storyboard generation | Partial | The configured primary model returns HTTP 503. A 503-only fallback to `gemini-3.6-flash` is implemented for storyboard and brainstorming calls. The direct provider integration returned a schema-valid five-scene storyboard through the fallback; app persistence, editing, and approval are still unverified. |
 | Conversational storyboard/video revisions | Not started | The current editor supports direct scene edits; chat-based revision is not implemented. |
-| ElevenLabs narration and timed caption cues | Partial | The approved-storyboard endpoint creates audio and aligned VTT captions. Persistent jobs now retain storyboard/asset references and caption cues; a new owner-scoped route restores a short-lived audio URL and cues after reload. The configured male voice returned HTTP 200; female returned HTTP 400. No narration was generated in this pass. R2 is not configured, so persistence and restoration cannot yet be accepted. |
+| ElevenLabs narration and timed caption cues | Partial | The approved-storyboard endpoint creates audio and aligned VTT captions. Persistent jobs now retain storyboard/asset references and caption cues; a new owner-scoped route restores a short-lived audio URL and cues after reload. The configured male voice returned HTTP 200; female returned HTTP 400. No narration was generated in this pass. R2 access is verified, but app-level persistence and restoration still need acceptance with an approved storyboard. |
 | Editable captions | Not started | Captions can be previewed, but there is no caption editing or saved revised caption version. |
 | Persistent generation jobs and recovery | Partial | Narration preview restoration is implemented for R2-backed assets. The durable Inngest workflow, resumable stage runner, and full recovery experience are not wired. |
 | Remotion render and 1080p MP4 download | Not started | No final MP4 renderer or downloadable video is available in the app. |
-| Private R2 media storage | Partial | Storage adapters exist. Persistent audio/caption output requires R2 configuration; the current local fallback is temporary. |
+| Private R2 media storage | Needs acceptance | `.env.local` is configured for the private `clairovid-dev` bucket. Read/list and a temporary write/read/delete round trip succeeded. Verify storage through the authenticated narration flow. |
 | Instagram connection, publishing, and scheduling | Not started | Settings shows that publishing is unavailable; OAuth, publish intents, scheduling, and status reconciliation are not implemented. |
 | Password recovery, production email, and launch operations | Partial | Verification email code exists, but provider configuration, recovery flow, abuse controls, tested backups/restore, and production launch checks remain. |
 
@@ -53,7 +53,7 @@ Acceptance checklist:
 
 **M4 — Restore approved narration and timed captions: implementation in progress**
 
-Generation jobs now retain the storyboard ID, asset references, and grouped caption cues. The new authenticated latest-generation endpoint checks project ownership and issues a fresh private audio URL; the video page attempts to restore the audio/caption preview on entry. TypeScript, ESLint, and an unauthenticated route check passed. End-to-end acceptance needs an approved storyboard and R2 configuration; neither persistent storage nor signed audio playback could be exercised in this pass.
+Generation jobs now retain the storyboard ID, asset references, and grouped caption cues. The new authenticated latest-generation endpoint checks project ownership and issues a fresh private audio URL; the video page attempts to restore the audio/caption preview on entry. TypeScript, ESLint, and an unauthenticated route check passed. R2 read/write access is now verified. End-to-end acceptance still needs an approved storyboard so narration can be generated and the signed audio preview restored through the app.
 
 **Accepted M2 — Create a private project and persist its idea (October 26, 2026):** created one private project, saved its topic, refreshed, and reopened it from My videos. The topic remained. Duplicate-create retries and forced save-failure recovery were not fault-injected.
 
@@ -90,6 +90,7 @@ Each milestone should have one bounded behavior, a written acceptance checklist,
 - November 2 app health: local app returned `ok`; MongoDB, auth, Gemini and ElevenLabs are configured. Email, R2 private storage, Inngest and Instagram are not configured. Without R2 and Remotion rendering, narration can only be a temporary development preview and the final MP4 stage is unavailable.
 - November 3 Gemini fallback: the configured primary returned HTTP 503 twice; the `gemini-3.6-flash` fallback succeeded through `generateStoryboard` and returned five schema-valid scenes. The river-flow prompt now avoids the inaccurate claim that gravity stops at sea level. No storyboard was persisted through the signed-in UI in this pass.
 - November 3 M4 implementation: generation jobs retain approved storyboard references, persisted cue groups, and narration/caption asset IDs. The authenticated latest-generation route returns 401 without a session as expected. The video page restores the saved preview when storage exists. R2 is still absent, and no paid ElevenLabs synthesis was triggered.
+- November 3 R2 verification: `.env.local` has all four R2 settings; app health reports private storage configured. `ListObjectsV2` succeeded for `clairovid-dev`; a temporary object write/read/delete round trip succeeded and the test object was removed. No credentials were printed or committed.
 - TypeScript (`npx tsc --noEmit`) and ESLint (`eslint src --no-cache`) passed November 3.
 - Local homepage and sign-in pages load on `http://127.0.0.1:4173/`.
 - The signed-in dashboard was visually inspected in the available Edge viewport; horizontal overflow was visible, so responsive layout still needs follow-up.
