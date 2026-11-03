@@ -42,7 +42,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const jobId = new ObjectId();
   const now = new Date();
-  await db.collection("jobs").insertOne({ _id: jobId, ownerId: user.id, projectId: project._id, type: "generation", state: "running", stage: "speech", progress: { stage: "Generating narration", completed: 0, total: 1 }, startedAt: now, createdAt: now, updatedAt: now });
+  await db.collection("jobs").insertOne({ _id: jobId, ownerId: user.id, projectId: project._id, storyboardId: new ObjectId(body.storyboardId), voicePreset: preset, type: "generation", state: "running", stage: "speech", progress: { stage: "Generating narration", completed: 0, total: 1 }, startedAt: now, createdAt: now, updatedAt: now });
   try {
     const audio = await synthesizeNarration(narration, preset);
     const cues = alignmentToWordCues(audio.alignment);
@@ -50,9 +50,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const sha256 = createHash("sha256").update(bytes).digest("hex");
     let audioUrl: string;
     let assetId: ObjectId | undefined;
+    let captionAssetId: ObjectId | undefined;
 
     if (hasPrivateStorage) {
       assetId = new ObjectId();
+      captionAssetId = new ObjectId();
       const base = `owners/${user.id}/projects/${project._id.toHexString()}/jobs/${jobId.toHexString()}/${randomUUID()}`;
       const audioKey = `${base}.mp3`;
       const captionsKey = `${base}.vtt`;
@@ -60,7 +62,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       await putPrivateObject(captionsKey, new TextEncoder().encode(wordCuesToVtt(cues)), "text/vtt; charset=utf-8");
       await db.collection("assets").insertMany([
         { _id: assetId, ownerId: user.id, projectId: project._id, jobId, kind: "narration", objectKey: audioKey, sha256, bytes: bytes.length, contentType: "audio/mpeg", state: "ready", voicePreset: preset, createdAt: new Date() },
-        { _id: new ObjectId(), ownerId: user.id, projectId: project._id, jobId, kind: "captions", objectKey: captionsKey, contentType: "text/vtt; charset=utf-8", state: "ready", cueCount: cues.length, createdAt: new Date() },
+        { _id: captionAssetId, ownerId: user.id, projectId: project._id, jobId, kind: "captions", objectKey: captionsKey, contentType: "text/vtt; charset=utf-8", state: "ready", cueCount: cues.length, createdAt: new Date() },
       ]);
       audioUrl = await getPrivateObjectUrl(audioKey);
     } else {
@@ -71,7 +73,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     await db.collection("jobs").updateOne({ _id: jobId, ownerId: user.id }, { $set: {
       state: "partial", stage: "render",
       progress: { stage: "Narration and timed captions ready; waiting for video renderer", completed: 1, total: 1 },
-      ...(assetId ? { assetId } : { developmentPreviewOnly: true }), updatedAt: new Date(),
+      ...(assetId ? { assetId, captionAssetId, captionCues: cues } : { developmentPreviewOnly: true }), updatedAt: new Date(),
     } });
     return Response.json({
       jobId: jobId.toHexString(), state: "partial", stage: "render", audioUrl, cues, sha256,

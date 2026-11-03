@@ -5,6 +5,7 @@ import { brainstormTopics } from "@/providers/gemini";
 import { z } from "zod";
 
 export const runtime = "nodejs";
+export const maxDuration = 150;
 const requestSchema = z.object({
   topic: z.string().trim().max(2000).optional().default(""),
   audience: z.string().trim().max(200).optional().default(""),

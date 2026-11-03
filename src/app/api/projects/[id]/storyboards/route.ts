@@ -3,6 +3,7 @@ import { auth } from "@/auth/server";
 import { getOwnedProject } from "@/domain/project";
 import { generateStoryboard } from "@/providers/gemini";
 export const runtime = "nodejs";
+export const maxDuration = 150;
 export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const user = (await auth.api.getSession({ headers: await headers() }))?.user; if (!user) return Response.json({ error: "Sign in required." }, { status: 401 });
   const project = await getOwnedProject(user.id, (await params).id); if (!project) return Response.json({ error: "Project not found." }, { status: 404 });
